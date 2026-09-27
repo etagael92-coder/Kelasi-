@@ -490,6 +490,7 @@
           <button onclick="navigate('profs')" data-nav="profs" class="nav-btn w-full text-left px-4 py-3 rounded-xl"><i data-lucide="school"></i> Profs & Salaires</button>
           <div class="px-3 pt-5 pb-2 text-[10px] uppercase tracking-wider font-black text-slate-400">Configuration</div>
           <button onclick="navigate('settings')" data-nav="settings" class="nav-btn w-full text-left px-4 py-3 rounded-xl"><i data-lucide="settings"></i> Paramètres</button>
+          <button onclick="openSubscriptionModal()" class="nav-btn w-full text-left px-4 py-3 rounded-xl"><i data-lucide="credit-card"></i> Abonnement</button>
         </nav>
         <div class="mt-auto p-4 border-t">
           <button onclick="logout()" class="w-full py-3 rounded-xl bg-slate-100 hover:bg-red-50 hover:text-red-600 font-semibold"><i data-lucide="log-out"></i> Déconnexion</button>
@@ -519,7 +520,11 @@
               <div><p class="text-sm text-slate-500">Bonjour, Directeur 👋</p><h1 class="text-2xl sm:text-3xl font-black mt-1">Vue générale de votre école</h1><p class="text-sm text-slate-500 mt-1"><span id="dashboardSchoolNameLabel">—</span> · Année scolaire 2026–2027</p></div>
               <button onclick="refreshDashboardData()" class="px-4 py-2.5 rounded-xl bg-white border font-bold text-sm inline-flex items-center gap-2"><i data-lucide="refresh-cw"></i> Actualiser</button>
             </div>
-            <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div id="subscriptionBanner" class="subscription-banner rounded-2xl p-4 sm:p-5 mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div class="min-w-0"><div class="flex items-center gap-2"><span id="subscriptionStatusPill" class="subscription-pill bg-blue-100 text-blue-700">Essai gratuit</span><span id="subscriptionDays" class="text-sm font-bold text-slate-700">14 jours</span></div><div id="subscriptionBannerText" class="text-sm text-slate-600 mt-2">Votre essai gratuit de 14 jours est actif.</div></div>
+  <button onclick="openSubscriptionModal()" class="shrink-0 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-sm">Voir l’abonnement</button>
+</div>
+<div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
               <div class="dashboard-kpi bg-white border rounded-2xl p-5 shadow-soft"><div class="text-slate-500 text-sm flex items-center gap-2"><i data-lucide="graduation-cap"></i> Élèves</div><div id="statStudents" class="text-3xl font-black mt-2">Chargement...</div><div class="text-xs text-slate-400 mt-1">Inscrits dans votre école</div></div>
               <div class="dashboard-kpi bg-white border rounded-2xl p-5 shadow-soft"><div class="text-slate-500 text-sm flex items-center gap-2"><i data-lucide="chart-no-axes-combined"></i> Moyenne générale</div><div id="statAverage" class="text-3xl font-black mt-2">Chargement...</div><div class="text-xs text-slate-400 mt-1">À partir des notes saisies</div></div>
               <div class="dashboard-kpi bg-white border rounded-2xl p-5 shadow-soft"><div class="text-slate-500 text-sm flex items-center gap-2"><i data-lucide="wallet"></i> Total encaissé</div><div id="statCollected" class="text-3xl font-black mt-2">Chargement...</div><div class="text-xs text-slate-400 mt-1">Paiements enregistrés</div></div>
@@ -913,6 +918,24 @@
     </div>
   </div>
 
+
+<style>
+.subscription-banner{background:linear-gradient(135deg,#eff6ff,#ffffff);border:1px solid #bfdbfe}
+.subscription-pill{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .65rem;border-radius:999px;font-size:.75rem;font-weight:800}
+.subscription-modal{max-width:720px}
+</style>
+<div id="subscriptionModal" class="fixed inset-0 z-[80] hidden bg-slate-950/50 p-4 flex items-center justify-center" onclick="closeSubscriptionModal(event)">
+ <div class="subscription-modal w-full bg-white rounded-3xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
+  <div class="p-5 sm:p-6 border-b flex items-start justify-between gap-4"><div><div class="text-xs font-black uppercase tracking-wider text-blue-600">KELASI</div><h3 class="text-2xl font-black mt-1">Votre abonnement</h3><p class="text-sm text-slate-500 mt-1">14 jours d’essai gratuit, puis activez votre accès avec Chariow.</p></div><button onclick="closeSubscriptionModal()" class="w-10 h-10 rounded-xl bg-slate-100"><i data-lucide="x"></i></button></div>
+  <div class="p-5 sm:p-6 space-y-4">
+   <div class="rounded-2xl border bg-slate-50 p-5"><div class="flex items-center justify-between gap-4"><div><div class="font-black text-lg">KELASI Pro</div><div class="text-sm text-slate-500 mt-1">Gestion complète de votre établissement</div></div><span id="subscriptionModalStatus" class="subscription-pill bg-blue-100 text-blue-700">Essai</span></div><div class="grid sm:grid-cols-3 gap-3 mt-5 text-sm"><div class="bg-white rounded-xl p-3 border"><b>Élèves</b><div class="text-slate-500">Gestion complète</div></div><div class="bg-white rounded-xl p-3 border"><b>Notes & bulletins</b><div class="text-slate-500">PDF et modèles</div></div><div class="bg-white rounded-xl p-3 border"><b>Finance</b><div class="text-slate-500">Suivi de l’école</div></div></div></div>
+   <div id="subscriptionCountdown" class="text-sm text-slate-600"></div>
+   <div id="chariowCheckout" class="min-h-[56px] flex items-center justify-center"></div>
+   <div class="flex flex-col sm:flex-row gap-2"><button onclick="refreshSubscription(true)" class="flex-1 px-4 py-3 rounded-xl border font-bold">Vérifier mon abonnement</button><button onclick="closeSubscriptionModal()" class="px-4 py-3 rounded-xl bg-slate-900 text-white font-bold">Fermer</button></div>
+   <p class="text-[11px] text-slate-400">Le paiement est traité par Chariow. L’activation automatique de l’abonnement nécessite un webhook Chariow relié à KELASI.</p>
+  </div>
+ </div>
+</div>
   <div id="toast" class="toast fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-[60] bg-slate-900 text-white px-5 py-3 rounded-full shadow-xl text-sm font-semibold"></div>
 
 <script>
@@ -937,6 +960,9 @@ let dashboardSchoolPendingLogo = null;
 let pendingDataImport = null;
 let pendingImportedSubjects = [];
 let enterAppRunning = false;
+let subscription = null;
+const CHARIOW_PRODUCT_ID = "prd_wyn34ks5";
+const CHARIOW_STORE_DOMAIN = "inxxhrjq.mychariow.market";
 let signupLogoData = null;
 let customBulletinDraft = null;
 let importFileHandles = {};
@@ -1286,7 +1312,7 @@ async function resetPassword() {
 
 async function logout(){
   if(supabaseClient)await supabaseClient.auth.signOut();
-  currentUser=null;school=null;students=[];teachers=[];notes=[];financeRows=[];subjects=[];subjectConfig={};selectedStudentClass="";signupLogoData=null;
+  currentUser=null;subscription=null;school=null;students=[];teachers=[];notes=[];financeRows=[];subjects=[];subjectConfig={};selectedStudentClass="";signupLogoData=null;
   $("appView")?.classList.add("hidden");
   $("authView")?.classList.remove("hidden");
   showLanding();
@@ -1305,6 +1331,7 @@ async function enterApp() {
     document.querySelector('.mobile-header')?.classList.add('app-visible');
 
     await loadSchool();
+    await ensureSubscription();
     if(!school) throw new Error("Profil de l'école introuvable.");
     await loadSubjectConfig();
     const fresh=await getAuthenticatedUser();
@@ -1334,6 +1361,68 @@ async function enterApp() {
   }
 }
 
+async function ensureSubscription(){
+  if(!currentUser?.id || !supabaseClient) return null;
+  const {data,error}=await supabaseClient.from("kelasi_subscriptions").select("*").eq("ecole_id",currentUser.id).maybeSingle();
+  if(error){console.warn("Abonnement:",error);return null;}
+  if(data){ subscription=data; await refreshSubscriptionState(false); return subscription; }
+  const payload={ecole_id:currentUser.id,plan:"trial",status:"trialing",trial_started_at:new Date().toISOString(),trial_ends_at:new Date(Date.now()+14*86400000).toISOString(),chariow_product_id:CHARIOW_PRODUCT_ID,chariow_customer_email:currentUser.email||null};
+  const res=await supabaseClient.from("kelasi_subscriptions").insert(payload).select().single();
+  if(res.error){console.warn("Création abonnement:",res.error);return null;}
+  subscription=res.data; renderSubscription(); return subscription;
+}
+async function refreshSubscriptionState(showToast=true){
+  if(!currentUser?.id)return null;
+  const {data,error}=await supabaseClient.from("kelasi_subscriptions").select("*").eq("ecole_id",currentUser.id).maybeSingle();
+  if(error){console.warn(error);return subscription;}
+  subscription=data||subscription;
+  if(subscription?.status==="trialing" && subscription.trial_ends_at && new Date(subscription.trial_ends_at)<=new Date()){
+    const upd=await supabaseClient.from("kelasi_subscriptions").update({status:"expired",updated_at:new Date().toISOString()}).eq("ecole_id",currentUser.id).select().maybeSingle();
+    if(!upd.error && upd.data) subscription=upd.data;
+  }
+  renderSubscription();
+  if(showToast) toast(subscription?.status==="active"?"Abonnement actif confirmé.":"Le statut de votre abonnement a été actualisé.");
+  return subscription;
+}
+function subscriptionIsActive(){
+  if(!subscription)return true;
+  if(subscription.status==="active")return true;
+  if(subscription.status==="trialing" && subscription.trial_ends_at) return new Date(subscription.trial_ends_at)>new Date();
+  return false;
+}
+function subscriptionLabel(){
+  if(subscription?.status==="active") return "Abonnement actif";
+  if(subscription?.status==="trialing") return "Essai gratuit";
+  if(subscription?.status==="expired") return "Essai terminé";
+  if(subscription?.status==="past_due") return "Paiement à régulariser";
+  return "Abonnement";
+}
+function daysLeftUntil(date){return Math.max(0,Math.ceil((new Date(date)-new Date())/86400000));}
+function renderSubscription(){
+  const pill=$("subscriptionStatusPill"), days=$("subscriptionDays"), textEl=$("subscriptionBannerText"), modalPill=$("subscriptionModalStatus"), countdown=$("subscriptionCountdown");
+  const active=subscription?.status==="active", trial=subscription?.status==="trialing";
+  const label=subscriptionLabel();
+  if(pill){pill.textContent=label;pill.className="subscription-pill "+(active?"bg-emerald-100 text-emerald-700":trial?"bg-blue-100 text-blue-700":"bg-red-100 text-red-700");}
+  if(days)days.textContent=trial?`${daysLeftUntil(subscription.trial_ends_at)} jour${daysLeftUntil(subscription.trial_ends_at)>1?'s':''} restant${daysLeftUntil(subscription.trial_ends_at)>1?'s':''}`:active?"Accès premium":"Accès à renouveler";
+  if(textEl)textEl.textContent=trial?"Votre essai gratuit de 14 jours est actif.":active?"Votre abonnement KELASI est actif.":"Votre période d’essai est terminée. Activez votre abonnement pour continuer.";
+  if(modalPill){modalPill.textContent=label;modalPill.className="subscription-pill "+(active?"bg-emerald-100 text-emerald-700":trial?"bg-blue-100 text-blue-700":"bg-red-100 text-red-700");}
+  if(countdown)countdown.textContent=trial?`Votre essai se termine le ${new Date(subscription.trial_ends_at).toLocaleDateString('fr-FR')}.`:active&&subscription.current_period_end?`Votre période actuelle se termine le ${new Date(subscription.current_period_end).toLocaleDateString('fr-FR')}.`:!active?"Activez votre abonnement pour récupérer l’accès complet.":"Votre abonnement est actif.";
+}
+function loadChariowWidget(){
+  const host=$("chariowCheckout"); if(!host)return;
+  host.innerHTML=`<div id="chariow-widget" data-product-id="${CHARIOW_PRODUCT_ID}" data-store-domain="${CHARIOW_STORE_DOMAIN}" data-style="tap" data-border-style="rounded" data-cta-width="xs" data-background-color="#FFFFFF" data-cta-animation="shine" data-locale="fr" data-primary-color="#2563EB"></div>`;
+  if(!document.querySelector('script[data-kelasi-chariow]')){
+    const link=document.createElement('link');link.rel='stylesheet';link.href='https://js.chariowcdn.com/v1/widget.min.css';link.dataset.kelasiChariow='1';document.head.appendChild(link);
+    const script=document.createElement('script');script.src='https://js.chariowcdn.com/v1/widget.min.js';script.async=true;script.dataset.kelasiChariow='1';document.head.appendChild(script);
+  }
+}
+async function openSubscriptionModal(){
+  const modal=$("subscriptionModal"); if(!modal)return;
+  modal.classList.remove("hidden"); renderSubscription(); loadChariowWidget();
+  if(window.lucide)lucide.createIcons();
+  await refreshSubscriptionState(false);
+}
+function closeSubscriptionModal(event){if(event && event.target!==$("subscriptionModal"))return;$("subscriptionModal")?.classList.add("hidden");}
 async function loadSchool() {
   const user=await getAuthenticatedUser();
   if(!user) return;
@@ -1438,6 +1527,7 @@ function renderAll() {
 }
 
 function navigate(page) {
+  if(currentUser && subscription && !subscriptionIsActive() && !["dashboard","settings"].includes(page)){ openSubscriptionModal(); toast("Votre essai est terminé. Activez votre abonnement pour continuer."); return; }
   const target = $("screen-" + page);
   if (!target) { console.warn("Écran KELASI introuvable :", page); return; }
   document.querySelectorAll(".screen").forEach(screen => {
